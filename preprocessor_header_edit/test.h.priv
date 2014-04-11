@@ -1,0 +1,10 @@
+/* Struct bla */
+struct bla
+{
+	/* BEGIN INTERNAL vars */
+	int a; /* var a */
+	/* END INTERNAL vars */
+	int x; /* var x */
+	int y; /* var y */
+	int z; /* var z */
+};

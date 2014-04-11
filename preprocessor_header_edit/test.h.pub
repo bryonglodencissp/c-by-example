@@ -1,0 +1,7 @@
+/* Struct bla */
+struct bla
+{
+	int x; /* var x */
+	int y; /* var y */
+	int z; /* var z */
+};
