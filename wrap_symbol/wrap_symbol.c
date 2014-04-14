@@ -1,3 +1,4 @@
+/* See https://sourceware.org/binutils/docs-2.24/ld/Options.html under --wrap */
 #include <stdio.h>
 #include <stdlib.h>
 
