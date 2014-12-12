@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static size_t mem_in_use;
+static size_t mem_alloced;
+
 int main()
 {
 	void *mydata = NULL;
@@ -11,6 +14,9 @@ int main()
 
 	mydata = calloc(4, 256);
 	free(mydata);
+
+	printf("Mem alloced: %zu bytes\n", mem_alloced);
+	printf("Mem in use: %zu bytes\n", mem_in_use);
 
 	return 0;
 }
@@ -24,6 +30,7 @@ void *__real_realloc (void *ptr, size_t size);
 void * __wrap_malloc (size_t size)
 {
 	void *lptr = __real_malloc(size);
+	mem_alloced += size;
 	printf("malloc: %lu bytes @%p\n", size, lptr);
 	return lptr;
 }
@@ -40,6 +47,7 @@ void * __wrap_free (void *data)
 void *__wrap_calloc (size_t nmemb, size_t size)
 {
 	void *lptr = __real_calloc(nmemb, size);
+	mem_alloced += nmemb * size;
 	printf("calloc: nmemb %zu, size %zu (%zu)@%p\n", nmemb, size, nmemb * size, lptr);
 	return lptr;
 }
@@ -48,6 +56,7 @@ void *__wrap_calloc (size_t nmemb, size_t size)
 void *__wrap_realloc (void *ptr, size_t size)
 {
 	void *lptr = __real_realloc(ptr, size);
+	mem_alloced += size;
 	printf("realloc: %p, ptr %p, size %zu\n", lptr, ptr, size);
 	return lptr;
 }
