@@ -4,6 +4,11 @@ xg_ssize_t xg_io_copy(struct xg_io_writer *dst, struct xg_io_reader *src)
 {
 	uint8_t b;
 
+	if (!dst->write) {
+		while (src->read(&b, 1) >= 1)
+			;
+	}
+
 	while (src->read(&b, 1) >= 1) {
 		if (dst->write(&b, 1) != 1)
 			return 0;

@@ -23,4 +23,8 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 add_executable(example_stdio example_stdio.c)
 target_link_libraries(example_stdio ${PROJECT_NAME})
-add_test(NAME "example_${example}" COMMAND "${CMAKE_CURRENT_BINARY_DIR}/example_stdio")
+add_test(NAME "example_stdio" COMMAND "${CMAKE_CURRENT_BINARY_DIR}/example_stdio")
+
+add_executable(example_null example_null.c)
+target_link_libraries(example_null ${PROJECT_NAME})
+add_test(NAME "example_null" COMMAND "${CMAKE_CURRENT_BINARY_DIR}/example_null")

@@ -13,24 +13,12 @@ xg_ssize_t read_stdin(uint8_t *dst, size_t n)
 	return -1;
 }
 
-xg_ssize_t write_stderr(uint8_t *src, size_t n)
-{
-	ssize_t _n = fwrite(src, n, 1, stderr);
-	if (_n >= 0)
-		return _n;
-
-	return -1;
-}
-
 int main(void)
 {
 	struct termios old, new;
 
 	struct xg_io_reader r = { .read = read_stdin };
-	struct xg_io_writer w = { .write = write_stderr };
-
-	setbuf(stdin, NULL);
-	setbuf(stdout, NULL);
+	struct xg_io_writer w = { .write = NULL };
 
 	if (isatty(STDIN_FILENO) == 1) {
 		/* Turn echoing off and fail if we can't. */

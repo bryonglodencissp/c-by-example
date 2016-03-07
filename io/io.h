@@ -21,7 +21,7 @@ struct xg_io_reader {
 };
 
 struct xg_io_writer {
-	xg_ssize_t (*write)(uint8_t *dst, size_t n);
+	xg_ssize_t (*write)(uint8_t *src, size_t n);
 };
 
 xg_ssize_t xg_io_copy(struct xg_io_writer *dst, struct xg_io_reader *src);
