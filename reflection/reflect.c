@@ -5,6 +5,7 @@
  * {id:2818093677,"name":"coord"}
  * {id:537904285,"name":"star"}
  * ```
+ * Preprocessor hash calculator from: http://www.heeden.nl/statichashc.htm
  */
 #include <stdio.h>
 #include <stdlib.h>
