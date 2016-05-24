@@ -19,13 +19,14 @@
 #define DECL_STRUCT_MEMBER(type, name) type name;
 
 #define DEF_STRUCT(sname, body) \
-	static const uint32_t sname##__id = HASH_S64(stringify(sname)); \
+	static const uint32_t sname##__id = HASH_S64(stringify(struct sname##_t)); \
 	static const char *sname##__name = stringify(sname); \
 	static const char *sname##__body = stringify(body); \
 	struct sname { \
 		DECL_STRUCT_FINGERPRINT \
 		body \
-	};
+	}; \
+	typedef struct sname sname##_t;
 
 #define decl_var(sname, x) struct sname x; x.__meta.id = sname##__id; x.__meta.name = sname##__name; x.__meta.body = sname##__body;
 #define decl_get_id(x) x.__meta.id
@@ -42,6 +43,13 @@ enum __member_type {
 	MEMBER_TYPE_SIZE_T   = 1,
 	MEMBER_TYPE_CHAR_PTR = 2
 };
+
+static const char *__member_type_str[] = {
+	"unknown",
+	"size_t",
+	"char*"
+};
+#define MEMBER_TYPE_STR(type) __member_type_str[(type)]
 
 struct __member_meta {
 	size_t id;
@@ -71,6 +79,8 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 				printf("\"\n");
 
 				if (!mtype.str) {
+					meta->id++;
+
 					mtype.str = token;
 					mtype.len = len;
 
@@ -80,16 +90,16 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 					meta->type = MEMBER_TYPE_UNKNOWN;
 
 					if (mtype.str != __meta_body) {
-					/** @todo c type string hash table with sizes */
-					if (memcmp(mtype.str, "size_t", mtype.len) == 0) {
-						meta->type = MEMBER_TYPE_SIZE_T;
-						meta->len = sizeof(size_t);
+						if (memcmp(mtype.str, "size_t", mtype.len) == 0) {
+							meta->type = MEMBER_TYPE_SIZE_T;
+							meta->len = sizeof(size_t);
+						} else if (memcmp(mtype.str, "char*", mtype.len) == 0) {
+							meta->type = MEMBER_TYPE_CHAR_PTR;
+							meta->len += sizeof(char *);
+						}
+					}
+					if (mtype.str != __meta_body)
 						offset += meta->len;
-					} else if (memcmp(mtype.str, "char*", mtype.len) == 0) {
-						meta->type = MEMBER_TYPE_CHAR_PTR;
-						offset += sizeof(char *);
-					}
-					}
 				} else {
 					mname.str = token;
 					mname.len = len;

@@ -23,25 +23,19 @@
 #include "reflect.h"
 
 DEF_STRUCT(coord,
+	DECL_STRUCT_MEMBER(size_t, monkey)
 	DECL_STRUCT_MEMBER(size_t, x)
 	DECL_STRUCT_MEMBER(size_t, y)
 )
 
 DEF_STRUCT(star,
-	DECL_STRUCT_MEMBER(float, x)
-	DECL_STRUCT_MEMBER(float, y)
+	DECL_STRUCT_MEMBER(char*, name)
+	DECL_STRUCT_MEMBER(coord_t*, coord)
 )
 
 DEF_STRUCT(my1337,
 	DECL_STRUCT_MEMBER(char*, str)
 )
-
-void serialize(void *s)
-{
-	uint32_t *__id = s;
-	const char **__name = (void *)((const char *)s + sizeof(__id));
-	printf("{id:%" PRIu32 ",\"name\":\"%s\"}\n", *__id, *__name);
-}
 
 int main(void)
 {
@@ -58,19 +52,12 @@ int main(void)
 	decl_get_member_meta("x", c.__meta.body, &meta);
 	printf("x offset: %zu\n", meta.offset);
 	printf("x len: %zu\n", meta.len);
+	printf("x type(%u): \"%s\"\n", meta.type, MEMBER_TYPE_STR(meta.type));
 
-	printf("decl_get_id(star, c): %u\n", decl_get_id(s));
-	printf("decl_get_name(star, s): %s\n", decl_get_name(s));
-	printf("decl_get_body(coord, c): %s\n", decl_get_body(s));
-
-	printf("decl_get_id(coord, m1337): %u\n", decl_get_id(m1337));
-	printf("decl_get_name(coord, m1337): %s\n", decl_get_name(m1337));
-	printf("decl_get_body(coord, m1337): %s\n", decl_get_body(m1337));
-
-	//printf("str offset: %zu\n", decl_member_offset("str", m1337.__meta.body));
-
-	serialize(&c);
-	serialize(&s);
+	c.monkey = 1337;
+	c.x      = 666;
+	c.y      = 777;
+	printf("x: %zu\n", *(size_t *)((void *)(&c) + sizeof(c.__meta) + meta.offset));
 
 	return 0;
 }
