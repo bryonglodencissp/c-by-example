@@ -70,6 +70,9 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 	char *token = __meta_body;
 	size_t offset = 0;
 	meta->id = 0;
+	meta->offset = 0;
+	meta->len = 0;
+	meta->type = MEMBER_TYPE_UNKNOWN;
 	struct str mtype = { .str = NULL };
 	struct str mname = { .str = NULL };
 
@@ -104,7 +107,7 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 							meta->len += sizeof(char *);
 						}
 					}
-					if (meta->id > 1 && mtype.str != __meta_body)
+					if (meta->id && mtype.str != __meta_body)
 						offset += meta->len;
 					meta->id++;
 				} else {
@@ -117,10 +120,12 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 					printf("Struct member: \"%.*s\" with type \"%.*s\"\n",
 						mname.len, mname.str,
 						mtype.len, mtype.str);
-
-					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0)
-						printf("\tFOUND!!!\n");
 #endif
+
+					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0) {
+//						printf("\tFOUND!!!\n");
+						break;
+					}
 
 					mtype.str = NULL;
 				}
@@ -130,6 +135,6 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 		cur++;
 	}
 
-	if (meta->id > 1)
+	if (meta->id)
 		meta->offset = offset;
 }

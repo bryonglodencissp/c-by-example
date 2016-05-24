@@ -52,8 +52,6 @@ void print_member(void *s, const char *member)
 int main(void)
 {
 	decl_var(coord, c);
-	decl_var(star, s)
-	decl_var(my1337, m1337)
 
 	printf("decl_get_id(coord, c): %u\n", decl_get_id(c));
 	printf("decl_get_name(coord, c): %s\n", decl_get_name(c));
@@ -62,7 +60,10 @@ int main(void)
 	c.monkey = 1337;
 	c.x      = 666;
 	c.y      = 777;
+
+	print_member(&c, "monkey");
 	print_member(&c, "x");
+	print_member(&c, "y");
 
 	return 0;
 }
