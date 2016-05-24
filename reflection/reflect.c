@@ -2,6 +2,13 @@
  * Hacking reflection type system with macros
  * Outputs:
  * ```
+ * decl_get_id(coord, c): 2818093677
+ * decl_get_name(coord, c): coord
+ * decl_get_body(coord, c): size_t x; size_t y;
+ * x offset: 0
+ * decl_get_id(star, c): 537904285
+ * decl_get_name(star, s): star
+ * decl_get_body(coord, c): float x; float y;
  * {id:2818093677,"name":"coord"}
  * {id:537904285,"name":"star"}
  * ```
@@ -38,9 +45,13 @@ int main(void)
 
 	printf("decl_get_id(coord, c): %u\n", decl_get_id(c));
 	printf("decl_get_name(coord, c): %s\n", decl_get_name(c));
+	printf("decl_get_body(coord, c): %s\n", decl_get_body(c));
+
+	printf("x offset: %zu\n", decl_member_offset("x", c.__meta.body));
 
 	printf("decl_get_id(star, c): %u\n", decl_get_id(s));
 	printf("decl_get_name(star, s): %s\n", decl_get_name(s));
+	printf("decl_get_body(coord, c): %s\n", decl_get_body(s));
 
 	serialize(&c);
 	serialize(&s);
