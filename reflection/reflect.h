@@ -34,11 +34,22 @@
 
 size_t decl_member_offset(const char *member, const char *__meta_body)
 {
-	const char *cur   = __meta_body;
-	const char *token     = NULL;
-	const char *token_end = NULL;
+	char *cur   = __meta_body;
+	char *token = __meta_body;
 
 	while (*cur) {
+		if (*cur == ';' || *cur == ' ') {
+			size_t len = cur - token;
+			size_t pos = cur - __meta_body - len;
+			if (token == __meta_body)
+				pos = 0;
+			if (len) {
+				printf("TOKEN(pos: %zu, len: %zu, token: \"", pos, len);
+				fwrite(token, len, 1, stdout);
+				printf("\"\n");
+			}
+			token = cur + 1;
+		}
 		cur++;
 	}
 
