@@ -37,11 +37,25 @@ struct str {
 	size_t len;
 };
 
-size_t decl_member_offset(const char *member, const char *__meta_body)
+enum __member_type {
+	MEMBER_TYPE_UNKNOWN  = 0,
+	MEMBER_TYPE_SIZE_T   = 1,
+	MEMBER_TYPE_CHAR_PTR = 2
+};
+
+struct __member_meta {
+	size_t id;
+	size_t offset;
+	size_t len;
+	enum __member_type type;
+};
+
+void decl_get_member_meta(const char *member, const char *__meta_body, struct __member_meta *meta)
 {
 	char *cur   = __meta_body;
 	char *token = __meta_body;
-
+	size_t offset = 0;
+	meta->id = 0;
 	struct str mtype = { .str = NULL };
 	struct str mname = { .str = NULL };
 
@@ -62,15 +76,33 @@ size_t decl_member_offset(const char *member, const char *__meta_body)
 
 					mname.str = NULL;
 					mname.len = 0;
+
+					meta->type = MEMBER_TYPE_UNKNOWN;
+
+					if (mtype.str != __meta_body) {
+					/** @todo c type string hash table with sizes */
+					if (memcmp(mtype.str, "size_t", mtype.len) == 0) {
+						meta->type = MEMBER_TYPE_SIZE_T;
+						meta->len = sizeof(size_t);
+						offset += meta->len;
+					} else if (memcmp(mtype.str, "char*", mtype.len) == 0) {
+						meta->type = MEMBER_TYPE_CHAR_PTR;
+						offset += sizeof(char *);
+					}
+					}
 				} else {
 					mname.str = token;
 					mname.len = len;
 				}
 
 				if (mname.str) {
-					printf("Member found: \"%.*s\" with type \"%.*s\"\n",
+					printf("Struct member: \"%.*s\" with type \"%.*s\"\n",
 						mname.len, mname.str,
 						mtype.len, mtype.str);
+
+					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0)
+						printf("\tFOUND!!!\n");
+
 					mtype.str = NULL;
 				}
 			}
@@ -79,10 +111,6 @@ size_t decl_member_offset(const char *member, const char *__meta_body)
 		cur++;
 	}
 
-	return 0;
-}
-
-void decl_print_member(void *x, const char *member)
-{
-	
+	if (meta->id)
+		meta->offset = offset;
 }

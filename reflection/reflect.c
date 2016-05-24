@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <inttypes.h>
 
 #include "reflect.h"
@@ -31,6 +32,10 @@ DEF_STRUCT(star,
 	DECL_STRUCT_MEMBER(float, y)
 )
 
+DEF_STRUCT(my1337,
+	DECL_STRUCT_MEMBER(char*, str)
+)
+
 void serialize(void *s)
 {
 	uint32_t *__id = s;
@@ -40,18 +45,29 @@ void serialize(void *s)
 
 int main(void)
 {
+	struct __member_meta meta;
+
 	decl_var(coord, c);
 	decl_var(star, s)
+	decl_var(my1337, m1337)
 
 	printf("decl_get_id(coord, c): %u\n", decl_get_id(c));
 	printf("decl_get_name(coord, c): %s\n", decl_get_name(c));
-	printf("decl_get_body(coord, c): %s\n", decl_get_body(c));
+	printf("decl_get_body(coord, c): \"%s\"\n", decl_get_body(c));
 
-	printf("x offset: %zu\n", decl_member_offset("x", c.__meta.body));
+	decl_get_member_meta("x", c.__meta.body, &meta);
+	printf("x offset: %zu\n", meta.offset);
+	printf("x len: %zu\n", meta.len);
 
 	printf("decl_get_id(star, c): %u\n", decl_get_id(s));
 	printf("decl_get_name(star, s): %s\n", decl_get_name(s));
 	printf("decl_get_body(coord, c): %s\n", decl_get_body(s));
+
+	printf("decl_get_id(coord, m1337): %u\n", decl_get_id(m1337));
+	printf("decl_get_name(coord, m1337): %s\n", decl_get_name(m1337));
+	printf("decl_get_body(coord, m1337): %s\n", decl_get_body(m1337));
+
+	//printf("str offset: %zu\n", decl_member_offset("str", m1337.__meta.body));
 
 	serialize(&c);
 	serialize(&s);
