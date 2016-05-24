@@ -37,10 +37,20 @@ DEF_STRUCT(my1337,
 	DECL_STRUCT_MEMBER(char*, str)
 )
 
+void print_member(void *s, const char *member)
+{
+	struct __meta *meta = s;
+	struct __member_meta mmeta;
+	decl_get_member_meta(member, meta->body, &mmeta);
+	printf("%s offset: %zu\n", member, mmeta.offset);
+	printf("%s len: %zu\n", member, mmeta.len);
+	printf("%s type(%u): \"%s\"\n", member, mmeta.type, MEMBER_TYPE_STR(mmeta.type));
+	if (mmeta.type == MEMBER_TYPE_SIZE_T)
+		printf("%s: %zu\n", member, *(size_t *)(s + sizeof(*meta) + mmeta.offset));
+}
+
 int main(void)
 {
-	struct __member_meta meta;
-
 	decl_var(coord, c);
 	decl_var(star, s)
 	decl_var(my1337, m1337)
@@ -49,15 +59,10 @@ int main(void)
 	printf("decl_get_name(coord, c): %s\n", decl_get_name(c));
 	printf("decl_get_body(coord, c): \"%s\"\n", decl_get_body(c));
 
-	decl_get_member_meta("x", c.__meta.body, &meta);
-	printf("x offset: %zu\n", meta.offset);
-	printf("x len: %zu\n", meta.len);
-	printf("x type(%u): \"%s\"\n", meta.type, MEMBER_TYPE_STR(meta.type));
-
 	c.monkey = 1337;
 	c.x      = 666;
 	c.y      = 777;
-	printf("x: %zu\n", *(size_t *)((void *)(&c) + sizeof(c.__meta) + meta.offset));
+	print_member(&c, "x");
 
 	return 0;
 }

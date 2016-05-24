@@ -16,6 +16,12 @@
 		const char *body; \
 	} __meta;
 
+	struct __meta {
+		uint32_t id;
+		const char *name;
+		const char *body;
+	};
+
 #define DECL_STRUCT_MEMBER(type, name) type name;
 
 #define DEF_STRUCT(sname, body) \
@@ -74,13 +80,13 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 			if (token == __meta_body)
 				pos = 0;
 			if (len) {
+#if 0
 				printf("TOKEN(pos: %zu, len: %zu, token: \"", pos, len);
 				fwrite(token, len, 1, stdout);
 				printf("\"\n");
+#endif
 
 				if (!mtype.str) {
-					meta->id++;
-
 					mtype.str = token;
 					mtype.len = len;
 
@@ -98,20 +104,23 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 							meta->len += sizeof(char *);
 						}
 					}
-					if (mtype.str != __meta_body)
+					if (meta->id > 1 && mtype.str != __meta_body)
 						offset += meta->len;
+					meta->id++;
 				} else {
 					mname.str = token;
 					mname.len = len;
 				}
 
 				if (mname.str) {
+#if 0
 					printf("Struct member: \"%.*s\" with type \"%.*s\"\n",
 						mname.len, mname.str,
 						mtype.len, mtype.str);
 
 					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0)
 						printf("\tFOUND!!!\n");
+#endif
 
 					mtype.str = NULL;
 				}
@@ -121,6 +130,6 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 		cur++;
 	}
 
-	if (meta->id)
+	if (meta->id > 1)
 		meta->offset = offset;
 }
