@@ -32,10 +32,18 @@
 #define decl_get_name(x) x.__meta.name
 #define decl_get_body(x) x.__meta.body
 
+struct str {
+	char *str;
+	size_t len;
+};
+
 size_t decl_member_offset(const char *member, const char *__meta_body)
 {
 	char *cur   = __meta_body;
 	char *token = __meta_body;
+
+	struct str mtype = { .str = NULL };
+	struct str mname = { .str = NULL };
 
 	while (*cur) {
 		if (*cur == ';' || *cur == ' ') {
@@ -47,6 +55,24 @@ size_t decl_member_offset(const char *member, const char *__meta_body)
 				printf("TOKEN(pos: %zu, len: %zu, token: \"", pos, len);
 				fwrite(token, len, 1, stdout);
 				printf("\"\n");
+
+				if (!mtype.str) {
+					mtype.str = token;
+					mtype.len = len;
+
+					mname.str = NULL;
+					mname.len = 0;
+				} else {
+					mname.str = token;
+					mname.len = len;
+				}
+
+				if (mname.str) {
+					printf("Member found: \"%.*s\" with type \"%.*s\"\n",
+						mname.len, mname.str,
+						mtype.len, mtype.str);
+					mtype.str = NULL;
+				}
 			}
 			token = cur + 1;
 		}
