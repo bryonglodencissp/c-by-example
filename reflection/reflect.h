@@ -79,16 +79,14 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 	while (*cur) {
 		if (*cur == ';' || *cur == ' ') {
 			size_t len = cur - token;
-			size_t pos = cur - __meta_body - len;
-			if (token == __meta_body)
+			size_t pos;
+			if (token != __meta_body)
+				pos = cur - __meta_body - len;
+			else
 				pos = 0;
-			if (len) {
-#if 0
-				printf("TOKEN(pos: %zu, len: %zu, token: \"", pos, len);
-				fwrite(token, len, 1, stdout);
-				printf("\"\n");
-#endif
 
+			if (len) {
+				// Fetch member type
 				if (!mtype.str) {
 					mtype.str = token;
 					mtype.len = len;
@@ -96,37 +94,27 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 					mname.str = NULL;
 					mname.len = 0;
 
-					meta->type = MEMBER_TYPE_UNKNOWN;
-
-					if (mtype.str != __meta_body) {
-						if (memcmp(mtype.str, "size_t", mtype.len) == 0) {
-							meta->type = MEMBER_TYPE_SIZE_T;
-							meta->len = sizeof(size_t);
-						} else if (memcmp(mtype.str, "char*", mtype.len) == 0) {
-							meta->type = MEMBER_TYPE_CHAR_PTR;
-							meta->len += sizeof(char *);
-						}
+					if (memcmp(mtype.str, "size_t", mtype.len) == 0) {
+						meta->type = MEMBER_TYPE_SIZE_T;
+						meta->len = sizeof(size_t);
+					} else if (memcmp(mtype.str, "char*", mtype.len) == 0) {
+						meta->type = MEMBER_TYPE_CHAR_PTR;
+						meta->len += sizeof(char *);
 					}
+
 					if (meta->id && mtype.str != __meta_body)
 						offset += meta->len;
+
 					meta->id++;
 				} else {
 					mname.str = token;
 					mname.len = len;
 				}
 
+				// Fetch member name
 				if (mname.str) {
-#if 0
-					printf("Struct member: \"%.*s\" with type \"%.*s\"\n",
-						mname.len, mname.str,
-						mtype.len, mtype.str);
-#endif
-
-					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0) {
-//						printf("\tFOUND!!!\n");
+					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0)
 						break;
-					}
-
 					mtype.str = NULL;
 				}
 			}
