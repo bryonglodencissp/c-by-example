@@ -40,7 +40,7 @@
 #define decl_get_body(x) x.__meta.body
 
 struct str {
-	char *str;
+	const char *str;
 	size_t len;
 };
 
@@ -55,7 +55,6 @@ static const char *__member_type_str[] = {
 	"size_t",
 	"char*"
 };
-#define MEMBER_TYPE_STR(type) __member_type_str[(type)]
 
 struct __member_meta {
 	size_t id;
@@ -64,15 +63,21 @@ struct __member_meta {
 	enum __member_type type;
 };
 
+static inline const char *decl_get_type_str(enum __member_type type)
+{
+	return __member_type_str[type];
+}
+
 void decl_get_member_meta(const char *member, const char *__meta_body, struct __member_meta *meta)
 {
-	char *cur   = __meta_body;
-	char *token = __meta_body;
+	const char *cur   = __meta_body;
+	const char *token = __meta_body;
 	size_t offset = 0;
 	meta->id = 0;
 	meta->offset = 0;
 	meta->len = 0;
 	meta->type = MEMBER_TYPE_UNKNOWN;
+	enum __member_type type = MEMBER_TYPE_UNKNOWN;
 	struct str mtype = { .str = NULL };
 	struct str mname = { .str = NULL };
 
@@ -95,10 +100,10 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 					mname.len = 0;
 
 					if (memcmp(mtype.str, "size_t", mtype.len) == 0) {
-						meta->type = MEMBER_TYPE_SIZE_T;
+						type = MEMBER_TYPE_SIZE_T;
 						meta->len = sizeof(size_t);
 					} else if (memcmp(mtype.str, "char*", mtype.len) == 0) {
-						meta->type = MEMBER_TYPE_CHAR_PTR;
+						type = MEMBER_TYPE_CHAR_PTR;
 						meta->len += sizeof(char *);
 					}
 
@@ -113,8 +118,10 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 
 				// Fetch member name
 				if (mname.str) {
-					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0)
+					if (strlen(member) == mname.len && memcmp(member, mname.str, mname.len) == 0) {
+						meta->type = type;
 						break;
+					}
 					mtype.str = NULL;
 				}
 			}
@@ -125,4 +132,31 @@ void decl_get_member_meta(const char *member, const char *__meta_body, struct __
 
 	if (meta->id)
 		meta->offset = offset;
+}
+
+enum __member_type decl_get_type(void *s, const char *member)
+{
+	struct __meta *meta = s;
+	struct __member_meta mmeta;
+	decl_get_member_meta(member, meta->body, &mmeta);
+	return mmeta.type;
+}
+
+void decl_print_member(void *s, const char *member)
+{
+	struct __meta *meta = s;
+	struct __member_meta mmeta;
+	decl_get_member_meta(member, meta->body, &mmeta);
+
+	if (mmeta.type == MEMBER_TYPE_UNKNOWN) {
+		printf("--- member \"%s\" -> unknown\n", member);
+		return;
+	}
+
+	printf("--- member \"%s\"\n", member);
+	printf("%s offset: %zu\n", member, mmeta.offset);
+	printf("%s len: %zu\n", member, mmeta.len);
+	printf("%s type(%u): \"%s\"\n", member, mmeta.type, decl_get_type_str(mmeta.type));
+	if (mmeta.type == MEMBER_TYPE_SIZE_T)
+		printf("%s: %zu\n", member, *(size_t *)(s + sizeof(*meta) + mmeta.offset));
 }
