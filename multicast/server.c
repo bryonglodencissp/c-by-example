@@ -6,7 +6,7 @@
 int main(void)
 {
 	char buf[64];
-	nmc_sock_t sock = nmc_open_subscribe("226.0.0.1", 4096);
+	nmc_sock_t sock = nmc_open(NMC_SOCK_TYPE_SUB, "226.0.0.1", 4096);
 
 	while (1) {
 		memset(buf, 0, sizeof(buf));

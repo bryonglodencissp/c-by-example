@@ -11,6 +11,7 @@ struct nmc_sock {
 	int fd;
 	char *ip;
 	uint16_t port;
+	enum nmc_sock_types type;
 	struct ip_mreq imreq;
 	struct sockaddr_in saddr;
 	struct in_addr iaddr;
@@ -33,7 +34,7 @@ static struct nmc_sock *nmc_create(void)
 	return sock;
 }
 
-struct nmc_sock *nmc_open_publish(const char *ip, uint16_t port)
+static struct nmc_sock *nmc_open_pub(const char *ip, uint16_t port)
 {
 	int ret;
 	struct nmc_sock *sock;
@@ -67,7 +68,7 @@ struct nmc_sock *nmc_open_publish(const char *ip, uint16_t port)
 	return sock;
 }
 
-struct nmc_sock *nmc_open_subscribe(const char *ip, uint16_t port)
+static struct nmc_sock *nmc_open_sub(const char *ip, uint16_t port)
 {
 	int ret;
 	struct nmc_sock *sock;
@@ -94,6 +95,22 @@ struct nmc_sock *nmc_open_subscribe(const char *ip, uint16_t port)
 		(const void *)&sock->imreq, sizeof(struct ip_mreq));
 
 	return sock;
+}
+
+nmc_sock_t nmc_open(enum nmc_sock_types type, const char *ip, uint16_t port)
+{
+	nmc_sock_t s = NULL;
+
+	switch (type) {
+	case NMC_SOCK_TYPE_PUB:
+		s = nmc_open_pub(ip, port);
+		break;
+	case NMC_SOCK_TYPE_SUB:
+		s = nmc_open_sub(ip, port);
+		break;
+	}
+
+	return s;
 }
 
 size_t nmc_send(struct nmc_sock *sock, void *data, size_t len)
